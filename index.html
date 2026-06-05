@@ -1,0 +1,1753 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Resultados Pruebas de Salidas — Tercer Grado</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: #ede7f6;
+            color: #2d3748;
+            min-height: 100vh;
+        }
+
+        /* ── HEADER ── */
+        header {
+            background: linear-gradient(135deg, #111111, #2d2d2d);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.25);
+        }
+        header h1 { font-size: 1.3rem; font-weight: 700; }
+        #headerCount { font-size: 0.85rem; opacity: 0.85; background: rgba(255,255,255,0.15); padding: 0.3rem 0.8rem; border-radius: 20px; }
+
+        /* ── TABS ── */
+        .tabs {
+            background: white;
+            display: flex;
+            border-bottom: 3px solid #e2e8f0;
+            padding: 0 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+        }
+        .tab {
+            padding: 0.9rem 1.4rem;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #718096;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -3px;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .tab:hover { color: #1a56db; }
+        .tab.active { color: #1a56db; border-bottom-color: #1a56db; }
+
+        /* ── LAYOUT ── */
+        .container { max-width: 960px; margin: 1.8rem auto; padding: 0 1rem; }
+        .section { display: none; }
+        .section.active { display: block; }
+
+        /* ── CARDS ── */
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+            margin-bottom: 1.5rem;
+        }
+        .card-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #1a56db;
+            margin-bottom: 1.2rem;
+            padding-bottom: 0.7rem;
+            border-bottom: 2px solid #e8edf5;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* ── FORM ── */
+        label {
+            display: block;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #4a5568;
+            margin-bottom: 0.3rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 0.55rem 0.75rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.92rem;
+            color: #2d3748;
+            transition: border-color 0.2s;
+            background: #fafbfc;
+        }
+        input:focus { outline: none; border-color: #1a56db; background: white; }
+        input::placeholder { color: #a0aec0; }
+
+        /* ── BUTTONS ── */
+        .btn {
+            padding: 0.55rem 1.1rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.18s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+        .btn-primary   { background: #1a56db; color: white; }
+        .btn-primary:hover { background: #1648c0; }
+        .btn-success   { background: #0a7f5e; color: white; }
+        .btn-success:hover { background: #086b4f; }
+        .btn-orange    { background: #e07b00; color: white; }
+        .btn-orange:hover { background: #c96e00; }
+        .btn-ghost     { background: #f1f5f9; color: #475569; }
+        .btn-ghost:hover { background: #e2e8f0; }
+        .btn-sm        { padding: 0.3rem 0.65rem; font-size: 0.8rem; }
+        .btn-danger-sm { background: #fee2e2; color: #b91c1c; padding: 0.28rem 0.55rem; font-size: 0.8rem; border-radius: 6px; border: none; cursor: pointer; font-weight: 700; }
+        .btn-danger-sm:hover { background: #fecaca; }
+
+        /* ── SETUP: content item ── */
+        .setup-item {
+            display: grid;
+            grid-template-columns: 1fr 140px 36px;
+            gap: 0.8rem;
+            align-items: end;
+            padding: 1rem;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            margin-bottom: 0.8rem;
+        }
+        .setup-num {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #1a56db;
+            margin-bottom: 0.25rem;
+        }
+
+        /* ── EVAL: scale box ── */
+        .scale-box {
+            background: #eff6ff;
+            border: 1.5px solid #bfdbfe;
+            border-radius: 10px;
+            padding: 0.9rem 1.2rem;
+            margin-bottom: 1.4rem;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+        }
+        .scale-label { font-size: 0.8rem; font-weight: 700; color: #1e40af; margin-right: 0.4rem; }
+        .scale-item { display: flex; align-items: center; gap: 0.4rem; font-size: 0.82rem; color: #374151; }
+
+        /* ── BADGES ── */
+        .badge {
+            display: inline-block;
+            padding: 0.22rem 0.7rem;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+        }
+        .badge-ALTO  { background: #d1fae5; color: #065f46; }
+        .badge-MEDIO { background: #fef3c7; color: #92400e; }
+        .badge-BAJO  { background: #fee2e2; color: #991b1b; }
+        .badge-none  { background: #f1f5f9; color: #94a3b8; }
+
+        /* ── EVAL: content row ── */
+        .eval-header {
+            display: grid;
+            grid-template-columns: 1fr 90px 110px 80px 110px;
+            gap: 0.6rem;
+            padding: 0 1rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .eval-row {
+            display: grid;
+            grid-template-columns: 1fr 90px 110px 80px 110px;
+            gap: 0.6rem;
+            align-items: center;
+            padding: 0.85rem 1rem;
+            background: #f8fafc;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 10px;
+            margin-bottom: 0.6rem;
+            transition: border-color 0.15s;
+        }
+        .eval-row:hover { border-color: #bfdbfe; }
+        .eval-row .cname { font-weight: 700; color: #1e293b; font-size: 0.92rem; }
+        .eval-row .maxpts-cell { text-align: center; font-weight: 700; color: #475569; font-size: 1rem; }
+        .pct-cell { text-align: center; font-size: 1.15rem; font-weight: 800; }
+        .cond-cell { text-align: center; }
+        .pts-input {
+            width: 80px;
+            padding: 0.45rem 0.6rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 700;
+            text-align: center;
+            display: block;
+            margin: 0 auto;
+            background: white;
+            transition: border-color 0.15s;
+        }
+        .pts-input:focus { outline: none; border-color: #1a56db; }
+
+        /* ── OVERALL SUMMARY ── */
+        .summary-strip {
+            margin-top: 1rem;
+            padding: 1rem 1.2rem;
+            background: #f0f4ff;
+            border: 2px solid #c7d7ff;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+        .summary-strip .s-label { font-size: 0.78rem; font-weight: 700; color: #4a5568; text-transform: uppercase; letter-spacing: 0.04em; }
+        .summary-strip .s-val   { font-size: 1.4rem; font-weight: 800; }
+        .summary-strip .s-item  { display: flex; flex-direction: column; align-items: center; }
+
+        /* ── ACTION ROW ── */
+        .action-row { display: flex; gap: 0.8rem; justify-content: flex-end; margin-top: 0.5rem; flex-wrap: wrap; }
+
+        /* ── GRÁFICOS ── */
+        .chart-subnav {
+            display: flex;
+            gap: 0.6rem;
+            margin-bottom: 1.4rem;
+            flex-wrap: wrap;
+        }
+        .chart-subbtn {
+            padding: 0.5rem 1.2rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 20px;
+            background: white;
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.18s;
+        }
+        .chart-subbtn.active { background: #1a56db; border-color: #1a56db; color: white; }
+        .sec-picker { display: flex; gap: 0.6rem; margin-bottom: 1.2rem; flex-wrap: wrap; }
+        .sec-btn {
+            padding: 0.45rem 1.1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            background: white;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.18s;
+        }
+        .sec-btn.s1.active { background: #1a56db; border-color: #1a56db; color: white; }
+        .sec-btn.s2.active { background: #0a7f5e; border-color: #0a7f5e; color: white; }
+        .sec-btn.s3.active { background: #9333ea; border-color: #9333ea; color: white; }
+        .chart-container { position: relative; margin-bottom: 1.8rem; }
+        .chart-title {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 0.8rem;
+        }
+        .chart-empty { text-align: center; padding: 2.5rem 1rem; color: #94a3b8; font-size: 0.9rem; }
+
+        /* ── BARRA DE PRUEBA ── */
+        .test-bar {
+            background: white;
+            border-bottom: 2px solid #e2e8f0;
+            padding: 0.6rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            flex-wrap: wrap;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+        }
+        .test-bar-label {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            white-space: nowrap;
+        }
+        #testSelector {
+            padding: 0.4rem 0.7rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #1e293b;
+            background: #f8fafc;
+            cursor: pointer;
+            min-width: 180px;
+            max-width: 260px;
+        }
+        #testSelector:focus { outline: none; border-color: #1a56db; }
+        @media (max-width: 540px) {
+            .test-bar { padding: 0.5rem 0.75rem; gap: 0.5rem; }
+            #testSelector { min-width: 140px; font-size: 0.85rem; }
+        }
+
+        /* ── RECORDS TABLE ── */
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
+        thead th {
+            background: #1a56db;
+            color: white;
+            padding: 0.65rem 0.8rem;
+            text-align: center;
+            font-weight: 700;
+            font-size: 0.78rem;
+            white-space: nowrap;
+        }
+        thead th:first-child { text-align: left; border-radius: 8px 0 0 0; }
+        thead th:last-child  { border-radius: 0 8px 0 0; }
+        tbody td { padding: 0.6rem 0.8rem; border-bottom: 1px solid #e8edf5; vertical-align: middle; }
+        tbody tr:nth-child(even) { background: #f8fafc; }
+        tbody tr:hover { background: #eff6ff; }
+
+        /* ── MODAL ── */
+        .overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15,23,42,0.55);
+            z-index: 500;
+            align-items: center;
+            justify-content: center;
+        }
+        .overlay.show { display: flex; }
+        .modal {
+            background: white;
+            border-radius: 14px;
+            padding: 1.8rem;
+            width: 94%;
+            max-width: 440px;
+            box-shadow: 0 24px 64px rgba(0,0,0,0.25);
+        }
+        .modal h3 { font-size: 1.15rem; color: #1a56db; margin-bottom: 1.2rem; }
+        .modal-wide { max-width: 760px; }
+
+        /* ── EMPTY STATE ── */
+        .empty { text-align: center; padding: 3rem 1rem; color: #94a3b8; }
+        .empty .icon { font-size: 3rem; margin-bottom: 0.8rem; }
+        .empty p { font-size: 0.95rem; }
+
+        /* ── TOAST ── */
+        #toast {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            background: #0a7f5e;
+            color: white;
+            padding: 0.75rem 1.3rem;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s;
+            z-index: 999;
+            pointer-events: none;
+        }
+        #toast.show { opacity: 1; transform: translateY(0); }
+
+        /* ── TABLET (≤ 768px) ── */
+        @media (max-width: 768px) {
+            header { padding: 0.8rem 1rem; }
+            header h1 { font-size: 1.1rem; }
+            .container { margin: 1rem auto; }
+            .card { padding: 1.2rem; }
+            .tabs { padding: 0 0.5rem; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+            .tab { padding: 0.8rem 1rem; font-size: 0.83rem; flex-shrink: 0; }
+            .eval-header { grid-template-columns: 1fr 80px 100px 72px 100px; font-size: 0.7rem; }
+            .eval-row    { grid-template-columns: 1fr 80px 100px 72px 100px; }
+            .setup-item  { grid-template-columns: 1fr 120px 36px; }
+        }
+
+        /* ── MÓVIL (≤ 540px) ── */
+        @media (max-width: 540px) {
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.35rem;
+                padding: 0.75rem 1rem;
+            }
+            header h1 { font-size: 1rem; }
+            #headerCount { font-size: 0.75rem; }
+
+            .tabs { padding: 0; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+            .tab  { padding: 0.7rem 0.85rem; font-size: 0.78rem; flex-shrink: 0; }
+
+            .container { margin: 0.75rem auto; padding: 0 0.65rem; }
+            .card { padding: 0.9rem; border-radius: 10px; }
+            .card-title { font-size: 0.95rem; }
+
+            /* Setup: nombre ancho completo, luego puntos + borrar */
+            .setup-item {
+                grid-template-columns: 1fr 36px;
+                grid-template-rows: auto auto;
+                gap: 0.6rem;
+            }
+            .setup-item > div:first-child  { grid-column: 1 / -1; }
+            .setup-item > div:nth-child(2) { grid-column: 1; }
+            .setup-item > div:nth-child(3) { grid-column: 2; align-self: end; }
+
+            /* Eval: ocultar cabecera, rediseñar filas en 2 rows */
+            .eval-header { display: none; }
+            .eval-row {
+                grid-template-columns: repeat(4, 1fr);
+                grid-template-areas:
+                    "name  name  name  name"
+                    "maxpt input pct   cond";
+                gap: 0.5rem;
+                padding: 0.75rem 0.8rem;
+            }
+            .eval-row .cname {
+                grid-area: name;
+                font-size: 0.9rem;
+                padding-bottom: 0.45rem;
+                border-bottom: 1px solid #e2e8f0;
+            }
+            .eval-row .maxpts-cell { grid-area: maxpt; text-align: center; }
+            .eval-row > div:nth-child(3) { grid-area: input; text-align: center; }
+            .eval-row .pct-cell  { grid-area: pct;  font-size: 0.95rem; }
+            .eval-row .cond-cell { grid-area: cond; }
+
+            /* Etiquetas mini sobre cada celda en móvil */
+            .eval-row .maxpts-cell::before,
+            .eval-row > div:nth-child(3)::before,
+            .eval-row .pct-cell::before,
+            .eval-row .cond-cell::before {
+                display: block;
+                font-size: 0.63rem;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.04em;
+                color: #94a3b8;
+                margin-bottom: 0.18rem;
+            }
+            .eval-row .maxpts-cell::before   { content: "Total"; }
+            .eval-row > div:nth-child(3)::before { content: "Correctos"; }
+            .eval-row .pct-cell::before      { content: "% Acierto"; }
+            .eval-row .cond-cell::before     { content: "Condición"; }
+
+            /* Input de puntos más compacto */
+            .pts-input { width: 100%; max-width: 62px; font-size: 0.9rem; padding: 0.38rem 0.3rem; }
+
+            /* Resumen general */
+            .summary-strip { gap: 0.8rem; justify-content: space-around; padding: 0.8rem; }
+            .summary-strip .s-val { font-size: 1.15rem; }
+
+            /* Escala de dominio */
+            .scale-box { padding: 0.7rem 0.9rem; gap: 0.6rem; }
+            .scale-label { font-size: 0.75rem; width: 100%; }
+
+            /* Botones de acción */
+            .action-row { justify-content: stretch; }
+            .action-row .btn { flex: 1; justify-content: center; font-size: 0.82rem; }
+
+            /* Modal */
+            .modal { padding: 1.2rem; border-radius: 10px; }
+            .modal h3 { font-size: 1rem; }
+
+            /* Toast */
+            #toast {
+                bottom: 0.75rem;
+                right: 0.65rem;
+                left: 0.65rem;
+                text-align: center;
+                font-size: 0.82rem;
+                padding: 0.65rem 1rem;
+            }
+
+            /* Registros: botones del header */
+            .records-toolbar { flex-direction: column; align-items: flex-start !important; gap: 0.5rem !important; }
+            .records-toolbar > div { flex-wrap: wrap; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>📚 Sistema de Resultados Pruebas de Salidas — Tercer Grado — Teacher Lu 💜</h1>
+    <span id="headerCount"></span>
+</header>
+
+<div class="tabs">
+    <div class="tab active" data-section="setup">⚙️ Configurar Prueba</div>
+    <div class="tab" data-section="evaluate">✏️ Evaluar Estudiante</div>
+    <div class="tab" data-section="records">📊 Registros</div>
+    <div class="tab" data-section="charts">📈 Gráficos</div>
+</div>
+
+<!-- ── BARRA DE MATERIA ── -->
+<div class="test-bar">
+    <span class="test-bar-label">📖 Materia:</span>
+    <select id="testSelector" onchange="switchTest(this.value)"></select>
+    <button class="btn btn-ghost btn-sm" onclick="createTest()">＋ Nueva materia</button>
+    <button class="btn btn-ghost btn-sm" onclick="renameTest()">✏️ Renombrar</button>
+    <button class="btn-danger-sm" onclick="deleteTest()">🗑</button>
+</div>
+
+<div class="container">
+
+    <!-- ══════════════════ TAB 1: SETUP ══════════════════ -->
+    <div id="section-setup" class="section active">
+        <div class="card">
+            <div class="card-title">📋 Contenidos de la Prueba</div>
+            <p style="font-size:0.88rem;color:#718096;margin-bottom:1.2rem;">
+                Agrega cada contenido que evalúa la prueba junto con sus puntos máximos.
+                Esta configuración se reutilizará para cada estudiante.
+            </p>
+            <div id="setupList"></div>
+            <button class="btn btn-ghost" onclick="addContent()" style="margin-top:0.4rem;">
+                ＋ Agregar contenido
+            </button>
+        </div>
+        <div class="action-row">
+            <button class="btn btn-primary" onclick="goToEvaluate()">
+                Guardar y empezar a evaluar →
+            </button>
+        </div>
+    </div>
+
+    <!-- ══════════════════ TAB 2: EVALUATE ══════════════════ -->
+    <div id="section-evaluate" class="section">
+
+        <div class="scale-box">
+            <span class="scale-label">Escala de dominio:</span>
+            <div class="scale-item"><span class="badge badge-ALTO">ALTO</span> 75 % – 100 %</div>
+            <div class="scale-item"><span class="badge badge-MEDIO">MEDIO</span> 61 % – 74 %</div>
+            <div class="scale-item"><span class="badge badge-BAJO">BAJO</span> 0 % – 60 %</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">✏️ Ingreso de puntos por contenido</div>
+
+            <div class="eval-header">
+                <span>Contenido</span>
+                <span style="text-align:center">Pts. total</span>
+                <span style="text-align:center">Pts. correctos</span>
+                <span style="text-align:center">%</span>
+                <span style="text-align:center">Condición</span>
+            </div>
+
+            <div id="evalList"></div>
+            <div id="overallBox"></div>
+        </div>
+
+        <div class="action-row">
+            <button class="btn btn-ghost" onclick="clearEval()">Limpiar puntajes</button>
+            <button class="btn btn-success" onclick="openSaveModal()">💾 Registrar estudiante</button>
+        </div>
+    </div>
+
+    <!-- ══════════════════ TAB 3: RECORDS ══════════════════ -->
+    <div id="section-records" class="section">
+        <div class="card">
+            <div class="records-toolbar" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.8rem;margin-bottom:1.2rem;">
+                <div class="card-title" style="margin:0;border:none;padding:0;">📊 Estudiantes registrados</div>
+                <div style="display:flex;gap:0.6rem;flex-wrap:wrap;">
+                    <button class="btn btn-ghost btn-sm" onclick="exportCSV()">📥 Exportar CSV</button>
+                    <button class="btn btn-ghost btn-sm" onclick="exportPDF()">🖨️ Exportar PDF</button>
+                    <button class="btn btn-danger-sm" onclick="clearAll()">🗑 Borrar todo</button>
+                </div>
+            </div>
+            <div id="recordsArea"></div>
+        </div>
+    </div>
+
+
+    <!-- ══════════════════ TAB 4: CHARTS ══════════════════ -->
+    <div id="section-charts" class="section">
+
+        <div class="chart-subnav">
+            <button class="chart-subbtn active" onclick="showChartView('seccion')">👤 Estudiantes por sección</button>
+            <button class="chart-subbtn" onclick="showChartView('comparar')">🏫 Comparar secciones</button>
+        </div>
+
+        <!-- Vista: por sección -->
+        <div id="chartview-seccion">
+            <div class="card">
+                <div class="card-title">📊 Resultados por sección</div>
+                <div class="sec-picker">
+                    <button class="sec-btn s1 active" onclick="selectSec('3-1')">Sección 3-1</button>
+                    <button class="sec-btn s2" onclick="selectSec('3-2')">Sección 3-2</button>
+                    <button class="sec-btn s3" onclick="selectSec('3-3')">Sección 3-3</button>
+                </div>
+                <div id="chartSecEmpty" class="chart-empty" style="display:none;">Sin estudiantes registrados en esta sección.</div>
+                <div id="chartSecContent">
+                    <div class="chart-container">
+                        <div class="chart-title">% General por estudiante</div>
+                        <canvas id="chartGeneral" height="100"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <div class="chart-title">Desempeño por contenido</div>
+                        <canvas id="chartContenidos" height="120"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vista: comparar secciones -->
+        <div id="chartview-comparar" style="display:none;">
+            <div class="card">
+                <div class="card-title">🏫 Comparativa entre secciones</div>
+                <div id="chartCmpEmpty" class="chart-empty" style="display:none;">No hay datos suficientes para comparar.</div>
+                <div id="chartCmpContent">
+                    <div class="chart-container">
+                        <div class="chart-title">Promedio general por sección</div>
+                        <canvas id="chartCmpGeneral" height="80"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <div class="chart-title">Promedio por contenido según sección</div>
+                        <canvas id="chartCmpContenidos" height="120"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ── MODAL: Guardar estudiante ── -->
+<div class="overlay" id="saveOverlay">
+    <div class="modal">
+        <h3>📝 Registrar estudiante</h3>
+        <div style="margin-bottom:1.2rem;">
+            <label>Nombre completo del estudiante</label>
+            <input type="text" id="studentNameInput" placeholder="Ej: María García López"
+                   onkeydown="if(event.key==='Enter') confirmSave()">
+        </div>
+        <div style="margin-bottom:1.2rem;">
+            <label>Sección</label>
+            <div style="display:flex;gap:0.8rem;margin-top:0.3rem;">
+                <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.95rem;font-weight:600;text-transform:none;letter-spacing:0;cursor:pointer;">
+                    <input type="radio" name="seccion" value="3-1" checked> 3-1
+                </label>
+                <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.95rem;font-weight:600;text-transform:none;letter-spacing:0;cursor:pointer;">
+                    <input type="radio" name="seccion" value="3-2"> 3-2
+                </label>
+                <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.95rem;font-weight:600;text-transform:none;letter-spacing:0;cursor:pointer;">
+                    <input type="radio" name="seccion" value="3-3"> 3-3
+                </label>
+            </div>
+        </div>
+        <div class="action-row">
+            <button class="btn btn-ghost" onclick="closeSaveModal()">Cancelar</button>
+            <button class="btn btn-success" onclick="confirmSave()">✓ Guardar</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── MODAL: Confirmación / Alerta genérica ── -->
+<div class="overlay" id="confirmOverlay">
+    <div class="modal">
+        <p id="confirmMsg" style="font-size:0.95rem;line-height:1.5;margin-bottom:1.4rem;color:#1e293b;"></p>
+        <div class="action-row">
+            <button class="btn btn-ghost" id="confirmCancelBtn" onclick="closeConfirm()">Cancelar</button>
+            <button class="btn btn-danger-sm" id="confirmOkBtn" onclick="_confirmCb && _confirmCb()" style="padding:0.55rem 1.1rem;font-size:0.88rem;border-radius:8px;">Eliminar</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── MODAL: Nueva / Renombrar prueba ── -->
+<div class="overlay" id="testModalOverlay">
+    <div class="modal">
+        <h3 id="testModalTitle">Nueva materia</h3>
+        <div style="margin-bottom:1.2rem;">
+            <label>Nombre de la materia / prueba</label>
+            <input type="text" id="testNameInput" placeholder="Ej: Matemáticas, Español, Ciencias…"
+                   onkeydown="if(event.key==='Enter') confirmTestModal()">
+        </div>
+        <div class="action-row">
+            <button class="btn btn-ghost" onclick="closeTestModal()">Cancelar</button>
+            <button class="btn btn-primary" onclick="confirmTestModal()">✓ Guardar</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── MODAL: Detalle estudiante ── -->
+<div class="overlay" id="detailOverlay">
+    <div class="modal modal-wide">
+        <h3 id="detailTitle"></h3>
+        <div id="detailBody"></div>
+        <div class="action-row" style="margin-top:1rem;">
+            <button class="btn btn-ghost" onclick="document.getElementById('detailOverlay').classList.remove('show')">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── TOAST ── -->
+<div id="toast"></div>
+
+<script>
+// ─────────────────────────────────────────
+//  STATE
+// ─────────────────────────────────────────
+let tests         = [];  // [{id, name, contents:[{id,name,maxPts}]}]
+let activeTestId  = null;
+let contents      = [];  // alias → tests[active].contents  (sync via syncContents)
+let students      = [];  // [{id, name, seccion, date, testId, scores, ...}]
+let evalPts       = {};
+
+function uid() { return Date.now() + '_' + Math.random().toString(36).slice(2,6); }
+
+function getActiveTest() {
+    return tests.find(t => t.id === activeTestId) || tests[0] || null;
+}
+
+// Sync the convenience `contents` variable to the active test
+function syncContents() {
+    const t = getActiveTest();
+    contents = t ? t.contents : [];
+}
+
+// Used when we reassign `contents` (e.g. filter). Updates both.
+function setContents(arr) {
+    contents = arr;
+    const t = getActiveTest();
+    if (t) t.contents = arr;
+}
+
+function saveTests()    { localStorage.setItem('ev3_tests',    JSON.stringify(tests)); }
+function saveStudents() { localStorage.setItem('ev3_students', JSON.stringify(students)); }
+function saveContents() { saveTests(); }
+
+function load() {
+    try { tests    = JSON.parse(localStorage.getItem('ev3_tests')    || '[]'); } catch(e) { tests = []; }
+    try { students = JSON.parse(localStorage.getItem('ev3_students') || '[]'); } catch(e) { students = []; }
+
+    // ── Migración desde versión anterior (sin soporte multi-prueba) ──
+    const oldContents = localStorage.getItem('ev3_contents');
+    if (oldContents && tests.length === 0) {
+        try {
+            const parsed = JSON.parse(oldContents);
+            if (parsed.length > 0) {
+                tests.push({ id: uid(), name: 'Prueba 1', contents: parsed });
+                saveTests();
+                localStorage.removeItem('ev3_contents');
+            }
+        } catch(e) {}
+    }
+    // Asignar testId a estudiantes antiguos (sin testId)
+    if (tests.length > 0) {
+        const firstId = tests[0].id;
+        students.forEach(s => { if (!s.testId) s.testId = firstId; });
+    }
+
+    activeTestId = tests.length > 0 ? tests[0].id : null;
+    syncContents();
+}
+
+// ─────────────────────────────────────────
+//  NAVIGATION
+// ─────────────────────────────────────────
+document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        tab.classList.add('active');
+        const sec = document.getElementById('section-' + tab.dataset.section);
+        if (sec) sec.classList.add('active');
+        if (tab.dataset.section === 'evaluate') renderEval();
+        if (tab.dataset.section === 'records')  renderRecords();
+        if (tab.dataset.section === 'charts')   renderCharts();
+    });
+});
+
+function switchTab(name) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.section === name));
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById('section-' + name).classList.add('active');
+    if (name === 'evaluate') renderEval();
+    if (name === 'records')  renderRecords();
+    if (name === 'charts')   renderCharts();
+}
+
+// ─────────────────────────────────────────
+//  SETUP TAB
+// ─────────────────────────────────────────
+function addContent(doRender = true) {
+    contents.push({ id: uid(), name: '', maxPts: '' });
+    if (doRender) renderSetup();
+}
+
+function removeContent(id) {
+    setContents(contents.filter(c => c.id !== id));
+    renderSetup();
+}
+
+function onContentName(id, val) {
+    const c = contents.find(c => c.id === id);
+    if (c) c.name = val;
+}
+
+function onContentPts(id, val) {
+    const c = contents.find(c => c.id === id);
+    if (c) c.maxPts = val === '' ? '' : Math.max(0, Number(val));
+}
+
+function renderSetup() {
+    const list = document.getElementById('setupList');
+    if (contents.length === 0) {
+        list.innerHTML = `<div class="empty"><div class="icon">📋</div><p>No hay contenidos. Haz clic en "Agregar contenido".</p></div>`;
+        return;
+    }
+    list.innerHTML = contents.map((c, i) => `
+        <div class="setup-item">
+            <div>
+                <div class="setup-num">Contenido ${i + 1}</div>
+                <label>Nombre del contenido</label>
+                <input type="text"
+                       value="${esc(c.name)}"
+                       placeholder="Ej: Lectura comprensiva, Sumas, Fracciones…"
+                       oninput="onContentName('${c.id}', this.value)">
+            </div>
+            <div>
+                <label>Puntos totales</label>
+                <input type="number" min="1"
+                       value="${c.maxPts}"
+                       placeholder="Ej: 20"
+                       oninput="onContentPts('${c.id}', this.value)">
+            </div>
+            <div style="padding-top:1.5rem;">
+                <button class="btn-danger-sm" onclick="removeContent('${c.id}')" title="Eliminar">✕</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function goToEvaluate() {
+    const valid = contents.filter(c => c.name.trim() && Number(c.maxPts) > 0);
+    if (valid.length === 0) {
+        showAlert('Agrega al menos un contenido con nombre y puntos totales antes de continuar.');
+        return;
+    }
+    setContents(valid);
+    saveContents();
+    evalPts = {};
+    switchTab('evaluate');
+}
+
+// ─────────────────────────────────────────
+//  EVALUATE TAB
+// ─────────────────────────────────────────
+function calcPct(earned, maxPts) {
+    if (earned === null || earned === undefined || earned === '' || maxPts <= 0) return null;
+    return Math.round((Number(earned) / Number(maxPts)) * 100);
+}
+
+function getCondition(pct) {
+    if (pct === null) return null;
+    if (pct >= 75) return 'ALTO';
+    if (pct >= 61) return 'MEDIO';
+    return 'BAJO';
+}
+
+function condColor(cond) {
+    return cond === 'ALTO' ? '#065f46' : cond === 'MEDIO' ? '#92400e' : '#991b1b';
+}
+
+function renderEval() {
+    const list = document.getElementById('evalList');
+
+    if (contents.length === 0) {
+        list.innerHTML = `<div class="empty">
+            <div class="icon">⚙️</div>
+            <p>Primero configura los contenidos en la pestaña "Configurar Prueba".</p>
+            <button class="btn btn-primary" style="margin-top:1rem;" onclick="switchTab('setup')">Ir a Configurar</button>
+        </div>`;
+        document.getElementById('overallBox').innerHTML = '';
+        return;
+    }
+
+    list.innerHTML = contents.map(c => {
+        const earned = evalPts[c.id] !== undefined ? evalPts[c.id] : '';
+        const pct    = calcPct(earned, c.maxPts);
+        const cond   = getCondition(pct);
+
+        return `
+        <div class="eval-row">
+            <div class="cname">${esc(c.name)}</div>
+            <div class="maxpts-cell">${c.maxPts}</div>
+            <div style="text-align:center;">
+                <input class="pts-input" type="number"
+                       min="0" max="${c.maxPts}"
+                       value="${earned}"
+                       placeholder="0"
+                       oninput="updateEval('${c.id}', this.value, '${c.maxPts}')">
+            </div>
+            <div class="pct-cell" id="pct_${c.id}" style="color:${cond ? condColor(cond) : '#cbd5e1'};">
+                ${pct !== null ? pct + '%' : '—'}
+            </div>
+            <div class="cond-cell" id="cond_${c.id}">
+                ${cond ? `<span class="badge badge-${cond}">${cond}</span>` : '<span class="badge badge-none">—</span>'}
+            </div>
+        </div>`;
+    }).join('');
+
+    renderOverall();
+}
+
+function updateEval(id, val, maxPts) {
+    if (val === '' || val === null) {
+        delete evalPts[id];
+    } else {
+        let n = Number(val);
+        n = Math.min(n, Number(maxPts));
+        n = Math.max(0, n);
+        evalPts[id] = n;
+    }
+
+    const pct  = calcPct(evalPts[id], maxPts);
+    const cond = getCondition(pct);
+
+    const pctEl  = document.getElementById('pct_'  + id);
+    const condEl = document.getElementById('cond_' + id);
+
+    if (pctEl)  pctEl.style.color = cond ? condColor(cond) : '#cbd5e1';
+    if (pctEl)  pctEl.textContent = pct !== null ? pct + '%' : '—';
+    if (condEl) condEl.innerHTML  = cond
+        ? `<span class="badge badge-${cond}">${cond}</span>`
+        : '<span class="badge badge-none">—</span>';
+
+    renderOverall();
+}
+
+function renderOverall() {
+    const box      = document.getElementById('overallBox');
+    const filled   = contents.filter(c => evalPts[c.id] !== undefined);
+    if (filled.length === 0) { box.innerHTML = ''; return; }
+
+    const totalPts  = contents.reduce((s, c) => s + Number(c.maxPts), 0);
+    const earnedPts = contents.reduce((s, c) => s + (evalPts[c.id] !== undefined ? evalPts[c.id] : 0), 0);
+    const overallPct = Math.round((earnedPts / totalPts) * 100);
+    const cond = getCondition(overallPct);
+    const allFilled = filled.length === contents.length;
+
+    box.innerHTML = `
+        <div class="summary-strip" style="border-color:${cond === 'ALTO' ? '#a7f3d0' : cond === 'MEDIO' ? '#fde68a' : '#fecaca'};">
+            <div class="s-item">
+                <span class="s-label">Puntos totales</span>
+                <span class="s-val">${earnedPts} / ${totalPts}</span>
+            </div>
+            <div class="s-item">
+                <span class="s-label">Porcentaje general</span>
+                <span class="s-val" style="color:${condColor(cond)};">${overallPct}%</span>
+            </div>
+            <div class="s-item">
+                <span class="s-label">Condición general</span>
+                <span class="badge badge-${cond}" style="font-size:0.95rem;padding:0.35rem 1rem;margin-top:0.25rem;">${cond}</span>
+            </div>
+            ${!allFilled ? `<div style="font-size:0.78rem;color:#94a3b8;align-self:flex-end;">(${filled.length}/${contents.length} contenidos ingresados)</div>` : ''}
+        </div>`;
+}
+
+function clearEval() {
+    if (Object.keys(evalPts).length === 0) return;
+    showConfirm('¿Limpiar todos los puntajes ingresados?', () => { evalPts = {}; renderEval(); });
+}
+
+// ─────────────────────────────────────────
+//  SAVE STUDENT
+// ─────────────────────────────────────────
+function openSaveModal() {
+    if (Object.keys(evalPts).length === 0) {
+        showAlert('Ingresa al menos un puntaje antes de registrar al estudiante.');
+        return;
+    }
+    document.getElementById('studentNameInput').value = '';
+    document.getElementById('saveOverlay').classList.add('show');
+    setTimeout(() => document.getElementById('studentNameInput').focus(), 80);
+}
+
+function closeSaveModal() {
+    document.getElementById('saveOverlay').classList.remove('show');
+}
+
+function confirmSave() {
+    const name = document.getElementById('studentNameInput').value.trim();
+    if (!name) { showAlert('Escribe el nombre del estudiante.'); return; }
+
+    const seccionEl = document.querySelector('input[name="seccion"]:checked');
+    const seccion = seccionEl ? seccionEl.value : '3-1';
+
+    const totalPts  = contents.reduce((s, c) => s + Number(c.maxPts), 0);
+    const scores    = contents.map(c => {
+        const earned = evalPts[c.id] !== undefined ? evalPts[c.id] : null;
+        const pct    = calcPct(earned, c.maxPts);
+        const cond   = getCondition(pct);
+        return { contentId: c.id, name: c.name, maxPts: Number(c.maxPts), earned, pct, condition: cond };
+    });
+
+    const earnedPts   = scores.reduce((s, sc) => s + (sc.earned !== null ? sc.earned : 0), 0);
+    const overallPct  = Math.round((earnedPts / totalPts) * 100);
+    const overallCond = getCondition(overallPct);
+
+    students.unshift({
+        id: uid(),
+        name,
+        seccion,
+        testId: activeTestId,
+        date: new Date().toLocaleDateString('es-ES'),
+        scores,
+        totalPts,
+        earnedPts,
+        pct: overallPct,
+        condition: overallCond
+    });
+
+    saveStudents();
+    closeSaveModal();
+    evalPts = {};
+    updateHeaderCount();
+    toast(`✅ "${name}" registrado correctamente`);
+
+    // Refresh eval (clear inputs) and show records
+    setTimeout(() => {
+        renderEval();
+        switchTab('records');
+    }, 400);
+}
+
+// ─────────────────────────────────────────
+//  RECORDS TAB
+// ─────────────────────────────────────────
+function renderRecords() {
+    const area = document.getElementById('recordsArea');
+    updateHeaderCount();
+
+    const testStudents = students.filter(s => s.testId === activeTestId);
+
+    if (testStudents.length === 0) {
+        area.innerHTML = `<div class="empty"><div class="icon">📊</div><p>No hay estudiantes registrados en esta prueba aún.</p></div>`;
+        return;
+    }
+
+    const allNames = [];
+    testStudents.forEach(s => s.scores.forEach(sc => {
+        if (!allNames.includes(sc.name)) allNames.push(sc.name);
+    }));
+
+    const secciones = ['3-1', '3-2', '3-3'];
+    const colores   = { '3-1': '#1a56db', '3-2': '#0a7f5e', '3-3': '#9333ea' };
+
+    area.innerHTML = secciones.map(sec => {
+        const grupo = testStudents.filter(s => (s.seccion || '3-1') === sec);
+
+        return `
+        <div style="margin-bottom:2rem;">
+            <div style="display:flex;align-items:center;gap:0.7rem;margin-bottom:0.8rem;">
+                <span style="background:${colores[sec]};color:white;font-weight:800;font-size:1rem;
+                             padding:0.3rem 1rem;border-radius:20px;">Sección ${sec}</span>
+                <span style="font-size:0.85rem;color:#718096;">${grupo.length} estudiante${grupo.length !== 1 ? 's' : ''}</span>
+            </div>
+            ${grupo.length === 0
+                ? `<div style="color:#94a3b8;font-size:0.88rem;padding:0.8rem 0.5rem;">Sin registros en esta sección.</div>`
+                : `<div class="table-wrap">
+                   <table>
+                       <thead>
+                           <tr>
+                               <th style="text-align:left;min-width:160px;background:${colores[sec]};">Estudiante</th>
+                               <th style="background:${colores[sec]};">Fecha</th>
+                               ${allNames.map(n => `<th style="min-width:120px;background:${colores[sec]};">${esc(n)}</th>`).join('')}
+                               <th style="background:${colores[sec]};">% General</th>
+                               <th style="background:${colores[sec]};">Condición</th>
+                               <th style="background:${colores[sec]};"></th>
+                           </tr>
+                       </thead>
+                       <tbody>
+                           ${grupo.map(s => `
+                           <tr>
+                               <td><strong>${esc(s.name)}</strong></td>
+                               <td style="color:#718096;font-size:0.82rem;white-space:nowrap;">${s.date}</td>
+                               ${allNames.map(n => {
+                                   const sc = s.scores.find(x => x.name === n);
+                                   if (!sc || sc.pct === null) return '<td style="text-align:center;color:#cbd5e1;">—</td>';
+                                   return `<td style="text-align:center;">
+                                       <span style="font-weight:700;color:${condColor(sc.condition)};">${sc.pct}%</span><br>
+                                       <span class="badge badge-${sc.condition}" style="font-size:0.7rem;">${sc.condition}</span>
+                                   </td>`;
+                               }).join('')}
+                               <td style="text-align:center;font-weight:800;font-size:1.05rem;color:${condColor(s.condition)};">${s.pct}%</td>
+                               <td style="text-align:center;"><span class="badge badge-${s.condition}">${s.condition}</span></td>
+                               <td style="text-align:center;white-space:nowrap;">
+                                   <button class="btn btn-ghost btn-sm" onclick="viewStudent('${s.id}')">Ver</button>
+                                   <button class="btn-danger-sm" onclick="deleteStudent('${s.id}')" style="margin-left:4px;">✕</button>
+                               </td>
+                           </tr>`).join('')}
+                       </tbody>
+                   </table>
+                   </div>`
+            }
+        </div>`;
+    }).join('');
+}
+
+function deleteStudent(id) {
+    showConfirm('¿Eliminar este registro?', () => {
+        students = students.filter(s => s.id !== id);
+        saveStudents();
+        renderRecords();
+    });
+}
+
+function viewStudent(id) {
+    const s = students.find(s => s.id === id);
+    if (!s) return;
+
+    document.getElementById('detailTitle').textContent = `📋 ${s.name} — Sección ${s.seccion || '3-1'} — ${s.date}`;
+    document.getElementById('detailBody').innerHTML = `
+        <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th style="text-align:left;">Contenido</th>
+                    <th>Pts. total</th>
+                    <th>Pts. correctos</th>
+                    <th>Porcentaje</th>
+                    <th>Condición</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${s.scores.map(sc => `
+                <tr>
+                    <td>${esc(sc.name)}</td>
+                    <td style="text-align:center;">${sc.maxPts}</td>
+                    <td style="text-align:center;">${sc.earned !== null ? sc.earned : '—'}</td>
+                    <td style="text-align:center;font-weight:700;color:${sc.condition ? condColor(sc.condition) : '#cbd5e1'};">
+                        ${sc.pct !== null ? sc.pct + '%' : '—'}
+                    </td>
+                    <td style="text-align:center;">
+                        ${sc.condition ? `<span class="badge badge-${sc.condition}">${sc.condition}</span>` : '<span class="badge badge-none">—</span>'}
+                    </td>
+                </tr>`).join('')}
+                <tr style="font-weight:700;background:#f0f4ff;">
+                    <td>RESULTADO GENERAL</td>
+                    <td style="text-align:center;">${s.totalPts}</td>
+                    <td style="text-align:center;">${s.earnedPts}</td>
+                    <td style="text-align:center;font-size:1.1rem;color:${condColor(s.condition)};">${s.pct}%</td>
+                    <td style="text-align:center;"><span class="badge badge-${s.condition}" style="font-size:0.88rem;">${s.condition}</span></td>
+                </tr>
+            </tbody>
+        </table>
+        </div>`;
+
+    document.getElementById('detailOverlay').classList.add('show');
+}
+
+function clearAll() {
+    const ts = students.filter(s => s.testId === activeTestId);
+    if (ts.length === 0) return;
+    showConfirm(`¿Eliminar los ${ts.length} registro(s) de esta prueba? Esta acción no se puede deshacer.`, () => {
+        students = students.filter(s => s.testId !== activeTestId);
+        saveStudents();
+        renderRecords();
+    });
+}
+
+// ─────────────────────────────────────────
+//  EXPORT CSV
+// ─────────────────────────────────────────
+function exportCSV() {
+    const ts = students.filter(s => s.testId === activeTestId);
+    if (ts.length === 0) { showAlert('No hay datos para exportar en esta prueba.'); return; }
+
+    const allNames = [];
+    ts.forEach(s => s.scores.forEach(sc => {
+        if (!allNames.includes(sc.name)) allNames.push(sc.name);
+    }));
+
+    const header = ['Estudiante', 'Sección', 'Fecha',
+        ...allNames.flatMap(n => [`${n} - Pts correctos`, `${n} - %`, `${n} - Condición`]),
+        'Pts. totales', 'Pts. correctos (total)', '% General', 'Condición General'
+    ];
+
+    const rows = ts.map(s => [
+        `"${s.name}"`, s.seccion || '3-1', s.date,
+        ...allNames.flatMap(n => {
+            const sc = s.scores.find(x => x.name === n);
+            return [sc?.earned ?? '', sc?.pct ?? '', sc?.condition ?? ''];
+        }),
+        s.totalPts, s.earnedPts, s.pct, s.condition
+    ]);
+
+    const csv = [header, ...rows].map(r => r.join(',')).join('\n');
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+    const a = Object.assign(document.createElement('a'), {
+        href: URL.createObjectURL(blob),
+        download: `evaluacion_3grado_${new Date().toISOString().slice(0,10)}.csv`
+    });
+    a.click();
+    URL.revokeObjectURL(a.href);
+}
+
+// ─────────────────────────────────────────
+//  EXPORT PDF
+// ─────────────────────────────────────────
+function exportPDF() {
+    const pdfStudents = students.filter(s => s.testId === activeTestId);
+    if (pdfStudents.length === 0) { showAlert('No hay datos para exportar en esta prueba.'); return; }
+
+    const allNames = [];
+    pdfStudents.forEach(s => s.scores.forEach(sc => {
+        if (!allNames.includes(sc.name)) allNames.push(sc.name);
+    }));
+
+    const secciones  = ['3-1', '3-2', '3-3'];
+    const colores    = { '3-1': '#1a56db', '3-2': '#0a7f5e', '3-3': '#9333ea' };
+    const fecha      = new Date().toLocaleDateString('es-ES', { year:'numeric', month:'long', day:'numeric' });
+    const testName   = getActiveTest()?.name || '';
+
+    const seccionesHTML = secciones.map(sec => {
+        const grupo = pdfStudents.filter(s => (s.seccion || '3-1') === sec);
+        const filas = grupo.length === 0
+            ? `<tr><td colspan="${3 + allNames.length * 2}" style="text-align:center;color:#94a3b8;padding:1rem;">Sin registros</td></tr>`
+            : grupo.map(s => `
+                <tr>
+                    <td style="font-weight:700;">${s.name}</td>
+                    <td style="text-align:center;color:#555;">${s.date}</td>
+                    ${allNames.map(n => {
+                        const sc = s.scores.find(x => x.name === n);
+                        if (!sc || sc.pct === null) return '<td style="text-align:center;color:#ccc;" colspan="2">—</td>';
+                        const bg = sc.condition === 'ALTO' ? '#d1fae5' : sc.condition === 'MEDIO' ? '#fef3c7' : '#fee2e2';
+                        const fg = sc.condition === 'ALTO' ? '#065f46' : sc.condition === 'MEDIO' ? '#92400e' : '#991b1b';
+                        return `<td style="text-align:center;font-weight:700;">${sc.pct}%</td>
+                                <td style="text-align:center;"><span style="background:${bg};color:${fg};padding:2px 7px;border-radius:10px;font-size:0.75rem;font-weight:700;">${sc.condition}</span></td>`;
+                    }).join('')}
+                    <td style="text-align:center;font-weight:800;color:${s.condition==='ALTO'?'#065f46':s.condition==='MEDIO'?'#92400e':'#991b1b'};">${s.pct}%</td>
+                    <td style="text-align:center;">
+                        <span style="background:${s.condition==='ALTO'?'#d1fae5':s.condition==='MEDIO'?'#fef3c7':'#fee2e2'};color:${s.condition==='ALTO'?'#065f46':s.condition==='MEDIO'?'#92400e':'#991b1b'};padding:2px 8px;border-radius:10px;font-size:0.78rem;font-weight:700;">${s.condition}</span>
+                    </td>
+                </tr>`).join('');
+
+        return `
+        <div class="sec-block">
+            <div class="sec-title" style="background:${colores[sec]};">Sección ${sec} — ${grupo.length} estudiante${grupo.length!==1?'s':''}</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th rowspan="2" style="text-align:left;min-width:140px;background:${colores[sec]};">Estudiante</th>
+                        <th rowspan="2" style="background:${colores[sec]};">Fecha</th>
+                        ${allNames.map(n => `<th colspan="2" style="background:${colores[sec]};">${n}</th>`).join('')}
+                        <th rowspan="2" style="background:${colores[sec]};">% General</th>
+                        <th rowspan="2" style="background:${colores[sec]};">Condición</th>
+                    </tr>
+                    <tr>
+                        ${allNames.map(() => `<th style="background:${colores[sec]};opacity:0.85;font-size:0.7rem;">%</th><th style="background:${colores[sec]};opacity:0.85;font-size:0.7rem;">Cond.</th>`).join('')}
+                    </tr>
+                </thead>
+                <tbody>${filas}</tbody>
+            </table>
+        </div>`;
+    }).join('');
+
+    const win = window.open('', '_blank');
+    win.document.write(`<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Evaluación Tercer Grado — ${fecha}</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Segoe UI',Arial,sans-serif; font-size:11px; color:#1a1a1a; padding:1.5cm; }
+  h1   { font-size:16px; color:#1a56db; margin-bottom:4px; }
+  .sub { font-size:11px; color:#555; margin-bottom:1.5rem; }
+  .sec-block { margin-bottom:2rem; page-break-inside:avoid; }
+  .sec-title { color:white; font-weight:700; font-size:12px; padding:6px 12px; border-radius:6px 6px 0 0; }
+  table { width:100%; border-collapse:collapse; font-size:10px; }
+  thead th { color:white; padding:5px 6px; text-align:center; font-weight:700; }
+  tbody td { padding:5px 6px; border-bottom:1px solid #e5e7eb; vertical-align:middle; }
+  tbody tr:nth-child(even) { background:#f8fafc; }
+  @media print {
+    body { padding:1cm; }
+    .sec-block { page-break-inside:avoid; }
+  }
+</style>
+</head>
+<body>
+  <h1>📚 ${testName} — Tercer Grado</h1>
+  <p class="sub">Generado el ${fecha} &nbsp;·&nbsp; ${pdfStudents.length} estudiante${pdfStudents.length!==1?'s':''} registrado${pdfStudents.length!==1?'s':''}</p>
+  ${seccionesHTML}
+  <script>window.onload=function(){ window.print(); }<\/script>
+</body>
+</html>`);
+    win.document.close();
+}
+
+// ─────────────────────────────────────────
+//  CHARTS
+// ─────────────────────────────────────────
+let activeChartView = 'seccion';
+let activeChartSec  = '3-1';
+let chartInstances  = {};
+
+const SEC_COLORS = {
+    '3-1': { bg: 'rgba(26,86,219,0.75)',  border: '#1a56db' },
+    '3-2': { bg: 'rgba(10,127,94,0.75)',  border: '#0a7f5e' },
+    '3-3': { bg: 'rgba(147,51,234,0.75)', border: '#9333ea' }
+};
+
+function condBg(pct) {
+    if (pct === null) return 'rgba(203,213,225,0.6)';
+    if (pct >= 75) return 'rgba(16,185,129,0.75)';
+    if (pct >= 61) return 'rgba(245,158,11,0.75)';
+    return 'rgba(239,68,68,0.75)';
+}
+function condBorder(pct) {
+    if (pct === null) return '#cbd5e1';
+    if (pct >= 75) return '#059669';
+    if (pct >= 61) return '#d97706';
+    return '#dc2626';
+}
+
+function destroyChart(id) {
+    if (chartInstances[id]) { chartInstances[id].destroy(); delete chartInstances[id]; }
+}
+
+function showChartView(view) {
+    activeChartView = view;
+    document.querySelectorAll('.chart-subbtn').forEach((b, i) => {
+        b.classList.toggle('active', (i === 0 && view === 'seccion') || (i === 1 && view === 'comparar'));
+    });
+    document.getElementById('chartview-seccion').style.display  = view === 'seccion'  ? '' : 'none';
+    document.getElementById('chartview-comparar').style.display = view === 'comparar' ? '' : 'none';
+    view === 'seccion' ? renderSeccionChart(activeChartSec) : renderCompararChart();
+}
+
+function selectSec(sec) {
+    activeChartSec = sec;
+    document.querySelectorAll('.sec-btn').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+    renderSeccionChart(sec);
+}
+
+function renderCharts() {
+    if (activeChartView === 'seccion') renderSeccionChart(activeChartSec);
+    else renderCompararChart();
+}
+
+/* ── Gráficos dentro de una sección ── */
+function renderSeccionChart(sec) {
+    const grupo = students.filter(s => s.testId === activeTestId && (s.seccion || '3-1') === sec);
+    const empty   = document.getElementById('chartSecEmpty');
+    const content = document.getElementById('chartSecContent');
+
+    destroyChart('chartGeneral');
+    destroyChart('chartContenidos');
+
+    if (grupo.length === 0) {
+        empty.style.display = '';
+        content.style.display = 'none';
+        return;
+    }
+    empty.style.display = 'none';
+    content.style.display = '';
+
+    const color = SEC_COLORS[sec];
+
+    // ── Chart 1: % general por estudiante (barras horizontales) ──
+    const labels1 = grupo.map(s => s.name);
+    const data1   = grupo.map(s => s.pct);
+    const bgColors1   = data1.map(condBg);
+    const bdColors1   = data1.map(condBorder);
+
+    chartInstances['chartGeneral'] = new Chart(
+        document.getElementById('chartGeneral'),
+        {
+            type: 'bar',
+            data: {
+                labels: labels1,
+                datasets: [{
+                    label: '% General',
+                    data: data1,
+                    backgroundColor: bgColors1,
+                    borderColor: bdColors1,
+                    borderWidth: 2,
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => {
+                                const pct = ctx.raw;
+                                const cond = pct >= 75 ? 'ALTO' : pct >= 61 ? 'MEDIO' : 'BAJO';
+                                return ` ${pct}%  — ${cond}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: { min: 0, max: 100, ticks: { callback: v => v + '%' }, grid: { color: '#f1f5f9' } },
+                    y: { ticks: { font: { weight: '600' } } }
+                }
+            }
+        }
+    );
+
+    // ── Chart 2: desempeño por contenido (barra agrupada por estudiante) ──
+    const allNames2 = [];
+    grupo.forEach(s => s.scores.forEach(sc => {
+        if (!allNames2.includes(sc.name)) allNames2.push(sc.name);
+    }));
+
+    const palette = [
+        'rgba(26,86,219,0.75)','rgba(10,127,94,0.75)','rgba(147,51,234,0.75)',
+        'rgba(245,158,11,0.75)','rgba(239,68,68,0.75)','rgba(20,184,166,0.75)',
+        'rgba(249,115,22,0.75)','rgba(236,72,153,0.75)'
+    ];
+    const paletteBorder = [
+        '#1a56db','#0a7f5e','#9333ea','#d97706','#dc2626','#0d9488','#ea580c','#db2777'
+    ];
+
+    const datasets2 = grupo.map((s, i) => ({
+        label: s.name,
+        data: allNames2.map(n => {
+            const sc = s.scores.find(x => x.name === n);
+            return sc?.pct ?? null;
+        }),
+        backgroundColor: palette[i % palette.length],
+        borderColor: paletteBorder[i % paletteBorder.length],
+        borderWidth: 2,
+        borderRadius: 5
+    }));
+
+    chartInstances['chartContenidos'] = new Chart(
+        document.getElementById('chartContenidos'),
+        {
+            type: 'bar',
+            data: { labels: allNames2, datasets: datasets2 },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
+                    tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label}: ${ctx.raw}%` } }
+                },
+                scales: {
+                    x: { ticks: { font: { size: 11 } } },
+                    y: { min: 0, max: 100, ticks: { callback: v => v + '%' }, grid: { color: '#f1f5f9' } }
+                }
+            }
+        }
+    );
+}
+
+/* ── Gráficos comparando las 3 secciones ── */
+function renderCompararChart() {
+    destroyChart('chartCmpGeneral');
+    destroyChart('chartCmpContenidos');
+
+    const secs = ['3-1', '3-2', '3-3'];
+    const empty   = document.getElementById('chartCmpEmpty');
+    const content = document.getElementById('chartCmpContent');
+
+    const secData = secs.map(sec => students.filter(s => s.testId === activeTestId && (s.seccion || '3-1') === sec));
+    const hasData = secData.some(g => g.length > 0);
+
+    if (!hasData) {
+        empty.style.display = '';
+        content.style.display = 'none';
+        return;
+    }
+    empty.style.display = 'none';
+    content.style.display = '';
+
+    // ── Chart 1: promedio general por sección ──
+    const avgGeneral = secs.map((sec, i) => {
+        const g = secData[i];
+        if (!g.length) return null;
+        return Math.round(g.reduce((s, st) => s + st.pct, 0) / g.length);
+    });
+
+    chartInstances['chartCmpGeneral'] = new Chart(
+        document.getElementById('chartCmpGeneral'),
+        {
+            type: 'bar',
+            data: {
+                labels: ['Sección 3-1', 'Sección 3-2', 'Sección 3-3'],
+                datasets: [{
+                    label: '% Promedio General',
+                    data: avgGeneral,
+                    backgroundColor: secs.map(s => SEC_COLORS[s].bg),
+                    borderColor: secs.map(s => SEC_COLORS[s].border),
+                    borderWidth: 2,
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { callbacks: { label: ctx => ctx.raw !== null ? ` ${ctx.raw}%` : ' Sin datos' } }
+                },
+                scales: {
+                    y: {
+                        min: 0, max: 100,
+                        ticks: { callback: v => v + '%' },
+                        grid: { color: '#f1f5f9' }
+                    }
+                }
+            }
+        }
+    );
+
+    // ── Chart 2: promedio por contenido según sección ──
+    const allNames = [];
+    students.forEach(s => s.scores.forEach(sc => {
+        if (!allNames.includes(sc.name)) allNames.push(sc.name);
+    }));
+
+    const datasets3 = secs.map((sec, i) => {
+        const g = secData[i];
+        return {
+            label: `Sección ${sec}`,
+            data: allNames.map(n => {
+                const vals = g.map(s => s.scores.find(x => x.name === n)?.pct).filter(v => v !== null && v !== undefined);
+                return vals.length ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length) : null;
+            }),
+            backgroundColor: SEC_COLORS[sec].bg,
+            borderColor: SEC_COLORS[sec].border,
+            borderWidth: 2,
+            borderRadius: 5
+        };
+    });
+
+    chartInstances['chartCmpContenidos'] = new Chart(
+        document.getElementById('chartCmpContenidos'),
+        {
+            type: 'bar',
+            data: { labels: allNames, datasets: datasets3 },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
+                    tooltip: { callbacks: { label: ctx => ctx.raw !== null ? ` ${ctx.dataset.label}: ${ctx.raw}%` : ' Sin datos' } }
+                },
+                scales: {
+                    x: { ticks: { font: { size: 11 } } },
+                    y: { min: 0, max: 100, ticks: { callback: v => v + '%' }, grid: { color: '#f1f5f9' } }
+                }
+            }
+        }
+    );
+}
+
+// ─────────────────────────────────────────
+//  GESTIÓN DE PRUEBAS (MATERIAS)
+// ─────────────────────────────────────────
+function renderTestBar() {
+    const sel = document.getElementById('testSelector');
+    sel.innerHTML = tests.map(t =>
+        `<option value="${t.id}" ${t.id === activeTestId ? 'selected' : ''}>${esc(t.name)}</option>`
+    ).join('');
+}
+
+function switchTest(id) {
+    activeTestId = id;
+    syncContents();
+    evalPts = {};
+    renderTestBar();
+    renderSetup();
+    renderEval();
+    // Re-render whichever tab is visible
+    const active = document.querySelector('.tab.active')?.dataset?.section;
+    if (active === 'records') renderRecords();
+    if (active === 'charts')  renderCharts();
+}
+
+let _testModalMode = 'create'; // 'create' | 'rename'
+
+function createTest() {
+    _testModalMode = 'create';
+    document.getElementById('testModalTitle').textContent = '➕ Nueva materia';
+    document.getElementById('testNameInput').value = '';
+    document.getElementById('testModalOverlay').classList.add('show');
+    setTimeout(() => document.getElementById('testNameInput').focus(), 80);
+}
+
+function renameTest() {
+    const t = getActiveTest();
+    if (!t) return;
+    _testModalMode = 'rename';
+    document.getElementById('testModalTitle').textContent = '✏️ Renombrar materia';
+    document.getElementById('testNameInput').value = t.name;
+    document.getElementById('testModalOverlay').classList.add('show');
+    setTimeout(() => { const i = document.getElementById('testNameInput'); i.focus(); i.select(); }, 80);
+}
+
+function closeTestModal() {
+    document.getElementById('testModalOverlay').classList.remove('show');
+}
+
+function confirmTestModal() {
+    const name = document.getElementById('testNameInput').value.trim();
+    if (!name) { alert('Escribe un nombre para la materia.'); return; }
+    closeTestModal();
+
+    if (_testModalMode === 'create') {
+        const t = { id: uid(), name, contents: [] };
+        tests.push(t);
+        activeTestId = t.id;
+        syncContents();
+        saveTests();
+        evalPts = {};
+        renderTestBar();
+        renderSetup();
+        renderEval();
+        toast(`✅ Materia "${name}" creada`);
+        switchTab('setup');
+    } else {
+        const t = getActiveTest();
+        if (!t) return;
+        t.name = name;
+        saveTests();
+        renderTestBar();
+        toast(`✅ Renombrada a "${name}"`);
+    }
+}
+
+function deleteTest() {
+    if (tests.length <= 1) { showAlert('Debe haber al menos una materia.'); return; }
+    const t = getActiveTest();
+    if (!t) return;
+    const count = students.filter(s => s.testId === t.id).length;
+    const msg = count > 0
+        ? `¿Eliminar la materia "${t.name}" y sus ${count} registros? Esta acción no se puede deshacer.`
+        : `¿Eliminar la materia "${t.name}"?`;
+    showConfirm(msg, () => {
+        students = students.filter(s => s.testId !== t.id);
+        tests = tests.filter(x => x.id !== t.id);
+        activeTestId = tests[0].id;
+        syncContents();
+        saveTests();
+        saveStudents();
+        evalPts = {};
+        renderTestBar();
+        renderSetup();
+        renderEval();
+        renderRecords();
+        toast(`🗑 Materia eliminada`);
+    });
+}
+
+// ─────────────────────────────────────────
+//  ALERT / CONFIRM HELPERS (sin usar prompt/confirm del browser)
+// ─────────────────────────────────────────
+let _confirmCb = null;
+
+function showConfirm(msg, onOk) {
+    _confirmCb = () => { closeConfirm(); onOk(); };
+    document.getElementById('confirmMsg').textContent = msg;
+    document.getElementById('confirmCancelBtn').style.display = '';
+    document.getElementById('confirmOverlay').classList.add('show');
+}
+
+function showAlert(msg) {
+    _confirmCb = null;
+    document.getElementById('confirmMsg').textContent = msg;
+    document.getElementById('confirmCancelBtn').style.display = 'none';
+    document.getElementById('confirmOkBtn').textContent = 'Aceptar';
+    document.getElementById('confirmOkBtn').onclick = closeConfirm;
+    document.getElementById('confirmOverlay').classList.add('show');
+}
+
+function closeConfirm() {
+    document.getElementById('confirmOverlay').classList.remove('show');
+    document.getElementById('confirmOkBtn').textContent = 'Eliminar';
+    document.getElementById('confirmOkBtn').onclick = () => _confirmCb && _confirmCb();
+}
+
+// ─────────────────────────────────────────
+//  UTILS
+// ─────────────────────────────────────────
+function esc(s) {
+    if (!s) return '';
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function updateHeaderCount() {
+    const el = document.getElementById('headerCount');
+    if (el) el.textContent = students.length > 0
+        ? `${students.length} estudiante${students.length !== 1 ? 's' : ''} registrado${students.length !== 1 ? 's' : ''}`
+        : '';
+}
+
+let toastTimer;
+function toast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+// Close overlays on backdrop click
+document.querySelectorAll('.overlay').forEach(ov => {
+    ov.addEventListener('click', e => { if (e.target === ov) ov.classList.remove('show'); });
+});
+
+// ─────────────────────────────────────────
+//  BOOT
+// ─────────────────────────────────────────
+(function boot() {
+    load();
+
+    // Si no hay pruebas, crear una por defecto
+    if (tests.length === 0) {
+        const t = { id: uid(), name: 'Prueba 1', contents: [] };
+        tests.push(t);
+        activeTestId = t.id;
+        syncContents();
+        saveTests();
+    }
+
+    if (contents.length === 0) {
+        addContent(false);
+        addContent(false);
+        addContent(false);
+    }
+
+    renderTestBar();
+    renderSetup();
+    updateHeaderCount();
+})();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+</body>
+</html>
