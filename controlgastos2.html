@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Control de Gastos — Persona 2</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --card: #1a1d27;
+      --card2: #21253a;
+      --accent: #6c63ff;
+      --accent2: #a78bfa;
+      --danger: #f87171;
+      --success: #34d399;
+      --warning: #fbbf24;
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --border: #2d3152;
+      --radius: 14px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Header ─────────────────────────────────────────── */
+    header {
+      background: linear-gradient(135deg, #1e1b4b 0%, #1a1d27 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    header h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: linear-gradient(90deg, var(--accent2), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .month-nav {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .month-nav button {
+      background: var(--card2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background .2s;
+    }
+    .month-nav button:hover { background: var(--accent); }
+    #monthLabel {
+      font-weight: 600;
+      font-size: 1rem;
+      min-width: 140px;
+      text-align: center;
+    }
+
+    /* ── Layout ──────────────────────────────────────────── */
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 28px 20px;
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 24px;
+    }
+    @media (max-width: 900px) {
+      main { grid-template-columns: 1fr; padding: 20px 16px; }
+    }
+    @media (max-width: 480px) {
+      main { padding: 14px 10px; gap: 14px; }
+    }
+
+    /* ── Cards ───────────────────────────────────────────── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px;
+    }
+    .card h2 {
+      font-size: .85rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    /* ── Budget block ────────────────────────────────────── */
+    .budget-display {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .stat {
+      background: var(--card2);
+      border-radius: 10px;
+      padding: 12px 8px;
+      text-align: center;
+      min-width: 0;
+    }
+    .stat .label { font-size: .70rem; color: var(--muted); margin-bottom: 4px; white-space: nowrap; }
+    .stat .value {
+      font-size: 1rem;
+      font-weight: 700;
+      word-break: break-all;
+      line-height: 1.2;
+    }
+    .stat.total .value  { color: var(--accent2); }
+    .stat.spent .value  { color: var(--danger); }
+    .stat.left .value   { color: var(--success); }
+
+    /* ── Progress bar ────────────────────────────────────── */
+    .progress-wrap { margin-bottom: 20px; }
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: .78rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .progress-bar {
+      height: 8px;
+      background: var(--card2);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      border-radius: 99px;
+      transition: width .5s ease, background .3s;
+      background: var(--success);
+    }
+    .progress-fill.warn  { background: var(--warning); }
+    .progress-fill.danger { background: var(--danger); }
+
+    /* ── Set budget ──────────────────────────────────────── */
+    .set-budget {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+    .set-budget input {
+      flex: 1;
+      background: var(--card2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 9px 12px;
+      font-size: .9rem;
+    }
+    .set-budget input:focus { outline: none; border-color: var(--accent); }
+    .set-budget button {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 9px 16px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: .85rem;
+      transition: opacity .2s;
+    }
+    .set-budget button:hover { opacity: .85; }
+
+    /* ── Add expense form ────────────────────────────────── */
+    .form-group { margin-bottom: 12px; }
+    .form-group label {
+      display: block;
+      font-size: .78rem;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+    .form-group input {
+      width: 100%;
+      background: var(--card2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: .9rem;
+    }
+    .form-group input:focus { outline: none; border-color: var(--accent); }
+    .btn-add {
+      width: 100%;
+      background: linear-gradient(135deg, var(--accent), #7c3aed);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 12px;
+      font-size: .95rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 6px;
+      transition: opacity .2s, transform .1s;
+    }
+    .btn-add:hover { opacity: .9; }
+    .btn-add:active { transform: scale(.98); }
+
+    /* ── Expense list ────────────────────────────────────── */
+    .expense-list { margin-top: 20px; max-height: 260px; overflow-y: auto; }
+    .expense-list::-webkit-scrollbar { width: 4px; }
+    .expense-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    .expense-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: var(--card2);
+      border-radius: 8px;
+      margin-bottom: 7px;
+      animation: fadeIn .25s ease;
+    }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:none; } }
+    .expense-item .ei-name { flex: 1; font-size: .88rem; font-weight: 500; }
+    .expense-item .ei-date { font-size: .72rem; color: var(--muted); }
+    .expense-item .ei-amount { font-weight: 700; color: var(--danger); font-size: .9rem; }
+    .expense-item .ei-del {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 2px 4px;
+      border-radius: 4px;
+      transition: color .2s;
+    }
+    .expense-item .ei-del:hover { color: var(--danger); }
+
+    /* ── Right column ────────────────────────────────────── */
+    .right-col { display: flex; flex-direction: column; gap: 24px; }
+
+    /* ── Calendar ────────────────────────────────────────── */
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+    }
+    .cal-header {
+      text-align: center;
+      font-size: .72rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      padding: 4px 0 8px;
+    }
+    .cal-day {
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      min-height: 72px;
+      padding: 6px 7px;
+      cursor: pointer;
+      transition: border-color .2s, background .2s;
+      position: relative;
+    }
+    .cal-day:hover { border-color: var(--accent); }
+    .cal-day.empty { background: transparent; border-color: transparent; cursor: default; }
+    .cal-day.today { border-color: var(--accent); }
+    .cal-day.has-expenses { background: #1e1b4b; border-color: #4338ca; }
+    .cal-day .day-num {
+      font-size: .78rem;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    .cal-day.today .day-num { color: var(--accent2); }
+    .cal-day .day-total {
+      font-size: .82rem;
+      font-weight: 700;
+      color: var(--danger);
+    }
+    .cal-day .day-count {
+      font-size: .68rem;
+      color: var(--muted);
+    }
+
+    /* ── Day modal ───────────────────────────────────────── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.65);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 26px;
+      width: 90%;
+      max-width: 420px;
+      max-height: 80vh;
+      overflow-y: auto;
+      animation: slideUp .25s ease;
+    }
+    @keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:none; } }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+    .modal-header h3 { font-size: 1.1rem; font-weight: 700; }
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 1.3rem;
+      cursor: pointer;
+    }
+    .modal-close:hover { color: var(--text); }
+    .modal-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .modal-item:last-child { border-bottom: none; }
+    .modal-item .mi-name { font-size: .9rem; }
+    .modal-item .mi-amount { font-weight: 700; color: var(--danger); }
+    .modal-empty { color: var(--muted); font-size: .88rem; text-align: center; padding: 20px 0; }
+
+    /* ── Recent expenses (right) ─────────────────────────── */
+    .recent-list { max-height: 200px; overflow-y: auto; }
+    .recent-list::-webkit-scrollbar { width: 4px; }
+    .recent-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    .empty-msg { color: var(--muted); font-size: .85rem; text-align: center; padding: 20px 0; }
+
+    /* ── Chart ───────────────────────────────────────────── */
+    .chart-container {
+      position: relative;
+      width: 220px;
+      height: 220px;
+      margin: 0 auto 20px;
+    }
+    .chart-legend {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      background: var(--card2);
+      border-radius: 8px;
+    }
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .legend-name {
+      flex: 1;
+      font-size: .85rem;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .legend-pct {
+      font-size: .82rem;
+      font-weight: 700;
+      color: var(--accent2);
+      white-space: nowrap;
+    }
+    .legend-amt {
+      font-size: .78rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    /* ── Import / Export ─────────────────────────────────── */
+    .io-bar {
+      display: flex;
+      gap: 8px;
+      margin-top: 18px;
+    }
+    .btn-io {
+      flex: 1;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 8px;
+      font-size: .82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity .2s, transform .1s;
+    }
+    .btn-io:hover { opacity: .85; }
+    .btn-io:active { transform: scale(.97); }
+    .btn-export { background: var(--card2); color: var(--accent2); border: 1px solid var(--border); }
+    .btn-import { background: var(--card2); color: var(--success);  border: 1px solid var(--border); }
+
+    /* ── Responsive: tablet ──────────────────────────────── */
+    @media (max-width: 640px) {
+      header { padding: 16px 20px; }
+      header h1 { font-size: 1.2rem; }
+      #monthLabel { min-width: 120px; font-size: .9rem; }
+
+      .card { padding: 18px 16px; }
+
+      .cal-day { min-height: 58px; padding: 5px 4px; }
+      .cal-day .day-total { font-size: .72rem; }
+      .cal-header { font-size: .68rem; }
+
+      .form-group input, .set-budget input {
+        padding: 11px 12px;
+        font-size: .95rem;
+      }
+      .btn-add { padding: 14px; font-size: 1rem; }
+    }
+
+    /* ── Responsive: phone ───────────────────────────────── */
+    @media (max-width: 480px) {
+      header { padding: 12px 14px; gap: 8px; }
+      header h1 { font-size: 1.1rem; }
+      #monthLabel { min-width: 100px; font-size: .85rem; }
+      .month-nav button { width: 30px; height: 30px; font-size: .9rem; }
+
+      .card { padding: 14px 12px; border-radius: 10px; }
+      .card h2 { font-size: .78rem; margin-bottom: 12px; }
+
+      .budget-display { gap: 7px; }
+      .stat { padding: 10px 6px; border-radius: 8px; }
+      .stat .label { font-size: .65rem; }
+      .stat .value { font-size: .88rem; }
+
+      .set-budget { flex-direction: column; }
+      .set-budget button { width: 100%; padding: 11px; }
+
+      .form-group input {
+        padding: 12px;
+        font-size: 1rem;
+      }
+      .btn-add { padding: 15px; font-size: 1rem; border-radius: 10px; }
+
+      .expense-list { max-height: none; }
+      .expense-item { padding: 10px; }
+      .expense-item .ei-name { font-size: .85rem; }
+      .expense-item .ei-amount { font-size: .85rem; }
+
+      .cal-day { min-height: 44px; padding: 4px 3px; border-radius: 6px; }
+      .cal-day .day-num { font-size: .7rem; margin-bottom: 2px; }
+      .cal-day .day-total { font-size: .62rem; }
+      .cal-day .day-count { display: none; }
+      .cal-header { font-size: .6rem; padding-bottom: 6px; }
+      .calendar-grid { gap: 4px; }
+
+      .modal { padding: 20px 16px; width: 96%; }
+      .modal-header h3 { font-size: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header>
+  <h1>💸 Control de Gastos — Persona 2</h1>
+  <div class="month-nav">
+    <button id="prevMonth">‹</button>
+    <span id="monthLabel"></span>
+    <button id="nextMonth">›</button>
+  </div>
+</header>
+
+<!-- Main layout -->
+<main>
+
+  <!-- Left column -->
+  <div class="left-col">
+
+    <!-- Budget summary -->
+    <div class="card" style="margin-bottom:0">
+      <h2>Presupuesto mensual</h2>
+
+      <div class="budget-display">
+        <div class="stat total">
+          <div class="label">Presupuesto</div>
+          <div class="value" id="statTotal">$0</div>
+        </div>
+        <div class="stat spent">
+          <div class="label">Gastado</div>
+          <div class="value" id="statSpent">$0</div>
+        </div>
+        <div class="stat left">
+          <div class="label">Restante</div>
+          <div class="value" id="statLeft">$0</div>
+        </div>
+      </div>
+
+      <div class="progress-wrap">
+        <div class="progress-label">
+          <span id="progPct">0% gastado</span>
+          <span id="progLabel"></span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill" style="width:0%"></div>
+        </div>
+      </div>
+
+      <div class="set-budget">
+        <input type="number" id="budgetInput" placeholder="Presupuesto mensual (ej: 500000)" min="0" />
+        <button onclick="setBudget()">Guardar</button>
+      </div>
+
+      <h2>Agregar gasto</h2>
+
+      <div class="form-group">
+        <label>Nombre del gasto</label>
+        <input type="text" id="expName" placeholder="Ej: Supermercado, Netflix…" />
+      </div>
+      <div class="form-group">
+        <label>Monto</label>
+        <input type="number" id="expAmount" placeholder="0" min="0" />
+      </div>
+      <div class="form-group">
+        <label>Fecha</label>
+        <input type="date" id="expDate" />
+      </div>
+      <button class="btn-add" onclick="addExpense()">+ Agregar gasto</button>
+
+      <!-- Expense list -->
+      <div style="margin-top:20px">
+        <h2>Gastos del mes</h2>
+        <div class="expense-list" id="expenseList">
+          <div class="empty-msg">Aún no hay gastos este mes.</div>
+        </div>
+      </div>
+
+      <!-- Import / Export -->
+      <div class="io-bar">
+        <button class="btn-io btn-export" onclick="exportData()">⬇ Exportar JSON</button>
+        <button class="btn-io btn-import" onclick="document.getElementById('importFile').click()">⬆ Importar JSON</button>
+        <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)" />
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Right column -->
+  <div class="right-col">
+
+    <!-- Calendar -->
+    <div class="card">
+      <h2>Calendario de gastos — <span id="calMonthLabel"></span></h2>
+      <div class="calendar-grid" id="calendarGrid"></div>
+    </div>
+
+    <!-- Chart -->
+    <div class="card" id="chartCard">
+      <h2>Distribución de gastos</h2>
+      <div id="chartEmpty" class="empty-msg" style="display:none">Aún no hay gastos para mostrar.</div>
+      <div id="chartWrap" style="display:none">
+        <div class="chart-container">
+          <canvas id="expenseChart"></canvas>
+        </div>
+        <div class="chart-legend" id="chartLegend"></div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- Day modal -->
+<div class="modal-overlay" id="dayModal" onclick="closeDayModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalTitle">Gastos del día</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+  // ── State ────────────────────────────────────────────────
+  let currentYear  = new Date().getFullYear();
+  let currentMonth = new Date().getMonth(); // 0-indexed
+
+  const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
+                  'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const DAYS   = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+
+  // ── Storage helpers ──────────────────────────────────────
+  function storageKey(y, m) { return `gastos2_${y}_${m}`; }
+
+  function loadMonth(y, m) {
+    const raw = localStorage.getItem(storageKey(y, m));
+    return raw ? JSON.parse(raw) : { budget: 0, expenses: [] };
+  }
+
+  function saveMonth(y, m, data) {
+    localStorage.setItem(storageKey(y, m), JSON.stringify(data));
+  }
+
+  // ── Format currency ──────────────────────────────────────
+  function fmt(n) {
+    return '₡' + Number(n).toLocaleString('es-CR');
+  }
+
+  // ── Set budget ───────────────────────────────────────────
+  function setBudget() {
+    const val = parseFloat(document.getElementById('budgetInput').value);
+    if (isNaN(val) || val < 0) { alert('Ingresa un monto válido.'); return; }
+    const data = loadMonth(currentYear, currentMonth);
+    data.budget = val;
+    saveMonth(currentYear, currentMonth, data);
+    document.getElementById('budgetInput').value = '';
+    render();
+  }
+
+  // ── Add expense ──────────────────────────────────────────
+  function addExpense() {
+    const name   = document.getElementById('expName').value.trim();
+    const amount = parseFloat(document.getElementById('expAmount').value);
+    const date   = document.getElementById('expDate').value;
+
+    if (!name)             { alert('Escribe el nombre del gasto.'); return; }
+    if (isNaN(amount) || amount <= 0) { alert('Ingresa un monto válido.'); return; }
+    if (!date)             { alert('Selecciona una fecha.'); return; }
+
+    const data = loadMonth(currentYear, currentMonth);
+    data.expenses.push({ id: Date.now(), name, amount, date });
+    saveMonth(currentYear, currentMonth, data);
+
+    document.getElementById('expName').value   = '';
+    document.getElementById('expAmount').value = '';
+    render();
+  }
+
+  // ── Delete expense ───────────────────────────────────────
+  function deleteExpense(id) {
+    const data = loadMonth(currentYear, currentMonth);
+    data.expenses = data.expenses.filter(e => e.id !== id);
+    saveMonth(currentYear, currentMonth, data);
+    render();
+  }
+
+  // ── Navigate months ──────────────────────────────────────
+  document.getElementById('prevMonth').onclick = () => {
+    currentMonth--;
+    if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+    render();
+  };
+  document.getElementById('nextMonth').onclick = () => {
+    currentMonth++;
+    if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+    render();
+  };
+
+  // ── Main render ──────────────────────────────────────────
+  function render() {
+    const data   = loadMonth(currentYear, currentMonth);
+    const budget = data.budget;
+    const spent  = data.expenses.reduce((s, e) => s + e.amount, 0);
+    const left   = budget - spent;
+    const pct    = budget > 0 ? Math.min(100, (spent / budget) * 100) : 0;
+
+    // Header label
+    document.getElementById('monthLabel').textContent =
+      `${MONTHS[currentMonth]} ${currentYear}`;
+    document.getElementById('calMonthLabel').textContent =
+      `${MONTHS[currentMonth]} ${currentYear}`;
+
+    // Stats
+    document.getElementById('statTotal').textContent = fmt(budget);
+    document.getElementById('statSpent').textContent = fmt(spent);
+    document.getElementById('statLeft').textContent  = fmt(left);
+
+    // Progress
+    const fill = document.getElementById('progressFill');
+    fill.style.width = pct + '%';
+    fill.className = 'progress-fill' +
+      (pct >= 90 ? ' danger' : pct >= 70 ? ' warn' : '');
+    document.getElementById('progPct').textContent = pct.toFixed(0) + '% gastado';
+    document.getElementById('progLabel').textContent =
+      budget > 0 ? fmt(left) + ' restante' : '';
+
+    // Budget input placeholder
+    document.getElementById('budgetInput').placeholder =
+      budget > 0 ? `Actual: ${fmt(budget)}` : 'Monto del mes (ej: 500000)';
+
+    // Set default date to today if same month
+    const today = new Date();
+    const expDateInput = document.getElementById('expDate');
+    if (!expDateInput.value) {
+      expDateInput.value = today.toISOString().split('T')[0];
+    }
+
+    renderExpenseList(data.expenses);
+    renderCalendar(data.expenses);
+    renderChart(data.expenses);
+  }
+
+  // ── Expense list ─────────────────────────────────────────
+  function renderExpenseList(expenses) {
+    const el = document.getElementById('expenseList');
+    if (!expenses.length) {
+      el.innerHTML = '<div class="empty-msg">Aún no hay gastos este mes.</div>';
+      return;
+    }
+    const sorted = [...expenses].sort((a, b) => b.date.localeCompare(a.date));
+    el.innerHTML = sorted.map(e => `
+      <div class="expense-item">
+        <div>
+          <div class="ei-name">${escHtml(e.name)}</div>
+          <div class="ei-date">${formatDate(e.date)}</div>
+        </div>
+        <div class="ei-amount">${fmt(e.amount)}</div>
+        <button class="ei-del" onclick="deleteExpense(${e.id})" title="Eliminar">✕</button>
+      </div>
+    `).join('');
+  }
+
+  // ── Calendar ─────────────────────────────────────────────
+  function renderCalendar(expenses) {
+    const grid = document.getElementById('calendarGrid');
+    const today = new Date();
+    const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+    // Group expenses by day
+    const byDay = {};
+    expenses.forEach(e => {
+      const d = parseInt(e.date.split('-')[2]);
+      if (!byDay[d]) byDay[d] = [];
+      byDay[d].push(e);
+    });
+
+    let html = DAYS.map(d => `<div class="cal-header">${d}</div>`).join('');
+
+    // Empty cells before first day
+    for (let i = 0; i < firstDay; i++) {
+      html += `<div class="cal-day empty"></div>`;
+    }
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const isToday = today.getFullYear() === currentYear &&
+                      today.getMonth() === currentMonth &&
+                      today.getDate() === d;
+      const dayExp = byDay[d] || [];
+      const dayTotal = dayExp.reduce((s, e) => s + e.amount, 0);
+      const hasExp = dayExp.length > 0;
+
+      html += `
+        <div class="cal-day ${isToday ? 'today' : ''} ${hasExp ? 'has-expenses' : ''}"
+             onclick="openDayModal(${d})">
+          <div class="day-num">${d}</div>
+          ${hasExp ? `
+            <div class="day-total">${fmt(dayTotal)}</div>
+            <div class="day-count">${dayExp.length} gasto${dayExp.length > 1 ? 's' : ''}</div>
+          ` : ''}
+        </div>
+      `;
+    }
+
+    grid.innerHTML = html;
+  }
+
+  // ── Day modal ────────────────────────────────────────────
+  function openDayModal(day) {
+    const data = loadMonth(currentYear, currentMonth);
+    const dateStr = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const dayExp = data.expenses.filter(e => e.date === dateStr);
+
+    document.getElementById('modalTitle').textContent =
+      `${day} de ${MONTHS[currentMonth]}`;
+
+    const body = document.getElementById('modalBody');
+    if (!dayExp.length) {
+      body.innerHTML = '<div class="modal-empty">No hay gastos este día.</div>';
+    } else {
+      const total = dayExp.reduce((s, e) => s + e.amount, 0);
+      body.innerHTML = dayExp.map(e => `
+        <div class="modal-item">
+          <span class="mi-name">${escHtml(e.name)}</span>
+          <span class="mi-amount">${fmt(e.amount)}</span>
+        </div>
+      `).join('') + `
+        <div class="modal-item" style="margin-top:8px;font-weight:700">
+          <span>Total del día</span>
+          <span style="color:var(--warning)">${fmt(total)}</span>
+        </div>
+      `;
+    }
+
+    document.getElementById('dayModal').classList.add('open');
+  }
+
+  function closeModal() {
+    document.getElementById('dayModal').classList.remove('open');
+  }
+
+  function closeDayModal(e) {
+    if (e.target === document.getElementById('dayModal')) closeModal();
+  }
+
+  // ── Utils ────────────────────────────────────────────────
+  function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function formatDate(dateStr) {
+    const [y, m, d] = dateStr.split('-');
+    return `${parseInt(d)} ${MONTHS[parseInt(m)-1]} ${y}`;
+  }
+
+  // ── Chart ───────────────────────────────────────────────
+  const CHART_COLORS = [
+    '#6c63ff','#f87171','#34d399','#fbbf24','#60a5fa',
+    '#f472b6','#a78bfa','#fb923c','#2dd4bf','#e879f9',
+    '#facc15','#38bdf8','#4ade80','#f97316','#818cf8'
+  ];
+  let chartInstance = null;
+
+  function renderChart(expenses) {
+    const empty   = document.getElementById('chartEmpty');
+    const wrap    = document.getElementById('chartWrap');
+    const legend  = document.getElementById('chartLegend');
+
+    if (!expenses.length) {
+      empty.style.display = 'block';
+      wrap.style.display  = 'none';
+      if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+      return;
+    }
+
+    empty.style.display = 'none';
+    wrap.style.display  = 'block';
+
+    // Aggregate by name
+    const totals = {};
+    expenses.forEach(e => {
+      totals[e.name] = (totals[e.name] || 0) + e.amount;
+    });
+
+    // Sort descending
+    const sorted = Object.entries(totals).sort((a, b) => b[1] - a[1]);
+    const grandTotal = sorted.reduce((s, [, v]) => s + v, 0);
+
+    const labels  = sorted.map(([k]) => k);
+    const values  = sorted.map(([, v]) => v);
+    const colors  = sorted.map((_, i) => CHART_COLORS[i % CHART_COLORS.length]);
+
+    // Draw chart
+    const ctx = document.getElementById('expenseChart').getContext('2d');
+    if (chartInstance) chartInstance.destroy();
+
+    chartInstance = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels,
+        datasets: [{
+          data: values,
+          backgroundColor: colors,
+          borderColor: '#1a1d27',
+          borderWidth: 3,
+          hoverOffset: 8
+        }]
+      },
+      options: {
+        cutout: '68%',
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => {
+                const pct = ((ctx.parsed / grandTotal) * 100).toFixed(1);
+                return ` ${fmt(ctx.parsed)} (${pct}%)`;
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // Legend
+    legend.innerHTML = sorted.map(([name, amount], i) => {
+      const pct = ((amount / grandTotal) * 100).toFixed(1);
+      return `
+        <div class="legend-item">
+          <div class="legend-dot" style="background:${colors[i]}"></div>
+          <span class="legend-name">${escHtml(name)}</span>
+          <span class="legend-amt">${fmt(amount)}</span>
+          <span class="legend-pct">${pct}%</span>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // ── Export ──────────────────────────────────────────────
+  function exportData() {
+    const all = {};
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key.startsWith('gastos2_')) {
+        all[key] = JSON.parse(localStorage.getItem(key));
+      }
+    }
+    if (!Object.keys(all).length) { alert('No hay datos para exportar.'); return; }
+
+    const blob = new Blob([JSON.stringify(all, null, 2)], { type: 'application/json' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `gastos_${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // ── Import ──────────────────────────────────────────────
+  function importData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = JSON.parse(e.target.result);
+        const keys = Object.keys(data).filter(k => k.startsWith('gastos2_'));
+        if (!keys.length) { alert('El archivo no contiene datos válidos.'); return; }
+
+        const overwrite = confirm(
+          `Se van a importar ${keys.length} mes(es) de datos.\n¿Querés reemplazar los datos existentes?`
+        );
+        if (!overwrite) return;
+
+        keys.forEach(k => localStorage.setItem(k, JSON.stringify(data[k])));
+        render();
+        alert('✅ Datos importados correctamente.');
+      } catch {
+        alert('❌ El archivo no es un JSON válido.');
+      }
+    };
+    reader.readAsText(file);
+    event.target.value = '';
+  }
+
+  // ── Init ─────────────────────────────────────────────────
+  render();
+</script>
+</body>
+</html>
